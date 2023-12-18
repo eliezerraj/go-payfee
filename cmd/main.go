@@ -9,6 +9,7 @@ import(
 	"strconv"
 	"net"
 
+	"github.com/joho/godotenv"
 	"github.com/go-payfee/internal/service"
 	"github.com/go-payfee/internal/handler"
 	"github.com/go-payfee/internal/repository/cache"
@@ -23,15 +24,12 @@ import(
 
 var(
 	logLevel 	= zerolog.DebugLevel
-	version 	= "GO-PAYFEE 1.0"
 	ctxTimeout  = 29 // Session TimeOut
 
 	infoPod					core.InfoPod
 	httpAppServerConfig 	core.HttpAppServer
 	server					core.Server
-
 	envCacheCluster			redis.ClusterOptions
-
 	noAZ		=	true // set only if you get to split the xray trace per AZ
 )
 
@@ -64,8 +62,15 @@ func getEnv() {
 
 func init(){
 	log.Debug().Msg("init")
+	zerolog.SetGlobalLevel(logLevel)
 
-	server.Port = 5004
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Info().Err(err).Msg("No .ENV File !!!!")
+	}
+
+	getEnv()
+
 	server.ReadTimeout = 60
 	server.WriteTimeout = 60
 	server.IdleTimeout = 60
@@ -73,7 +78,6 @@ func init(){
 
 	envCacheCluster.Username = ""
 	envCacheCluster.Password = ""
-	envCacheCluster.Addrs = strings.Split("clustercfg.memdb-arch.vovqz2.memorydb.us-east-2.amazonaws.com:6379", ",")
 
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
@@ -88,8 +92,6 @@ func init(){
 		}
 	}
 	infoPod.OSPID = strconv.Itoa(os.Getpid())
-
-	getEnv()
 
 	// Get AZ only if localtest is true
 	if (noAZ != true) {
