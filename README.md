@@ -1,6 +1,6 @@
 # go-payfee
 
-POC for test purposes.
+POC for test purposes
 
 CRUD an REDIS cluster.
 
