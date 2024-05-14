@@ -18,43 +18,53 @@ import (
 	"github.com/aws/aws-xray-sdk-go/xray"
 
 )
-
+//----------------------------------------------------------------
 type HttpWorkerAdapter struct {
 	workerService 	*service.RedisService
 }
 
-func NewHttpWorkerAdapter(workerService *service.RedisService) *HttpWorkerAdapter {
+func NewHttpWorkerAdapter(workerService *service.RedisService) HttpWorkerAdapter {
 	childLogger.Debug().Msg("NewHttpWorkerAdapter")
-	return &HttpWorkerAdapter{
+	
+	return HttpWorkerAdapter{
 		workerService: workerService,
 	}
 }
-
+//------------------------------------------------------
 type HttpServer struct {
-	httpAppServer 	core.HttpAppServer
+	httpServer	*core.Server
 }
 
-func NewHttpAppServer(httpAppServer core.HttpAppServer) HttpServer {
+func NewHttpAppServer(httpServer *core.Server) HttpServer {
 	childLogger.Debug().Msg("NewHttpAppServer")
 
-	return HttpServer{	
-						httpAppServer: httpAppServer,
-					}
+	return HttpServer{httpServer: httpServer }
 }
-
-func (h HttpServer) StartHttpAppServer(ctx context.Context, httpWorkerAdapter *HttpWorkerAdapter) {
+//-------------------------------------------------
+func (h HttpServer) StartHttpAppServer(	ctx context.Context, 
+										httpWorkerAdapter *HttpWorkerAdapter,
+										appServer *core.AppServer) {
 	childLogger.Info().Msg("StartHttpAppServer")
-		
+
 	myRouter := mux.NewRouter().StrictSlash(true)
 
 	myRouter.HandleFunc("/", func(rw http.ResponseWriter, req *http.Request) {
 		childLogger.Debug().Msg("/")
-		json.NewEncoder(rw).Encode(h.httpAppServer)
+
+		json.NewEncoder(rw).Encode(appServer)
 	})
 
 	myRouter.HandleFunc("/info", func(rw http.ResponseWriter, req *http.Request) {
 		childLogger.Debug().Msg("/info")
-		json.NewEncoder(rw).Encode(h.httpAppServer)
+		
+		res := core.AppServer{}
+		
+		res.InfoPod =  appServer.InfoPod
+		res.Server =  appServer.Server
+		res.RedisAddress =  appServer.RedisAddress
+		res.ConfigOTEL =  appServer.ConfigOTEL
+
+		json.NewEncoder(rw).Encode(res)
 	})
 	
 	health := myRouter.Methods(http.MethodGet, http.MethodOptions).Subrouter()
@@ -69,41 +79,41 @@ func (h HttpServer) StartHttpAppServer(ctx context.Context, httpWorkerAdapter *H
 
 	setKey := myRouter.Methods(http.MethodPost, http.MethodOptions).Subrouter()
 	setKey.Handle("/key/add", 
-						xray.Handler(xray.NewFixedSegmentNamer(fmt.Sprintf("%s%s%s", "payfee:", h.httpAppServer.InfoPod.AvailabilityZone, "./key/add")), 
+						xray.Handler(xray.NewFixedSegmentNamer(fmt.Sprintf("%s%s%s", "payfee:", appServer.InfoPod.AvailabilityZone, "./key/add")), 
 						http.HandlerFunc(httpWorkerAdapter.AddKey),
 						),
 	)
 
 	getKey := myRouter.Methods(http.MethodGet, http.MethodOptions).Subrouter()
 	getKey.Handle("/key/get/{id}",
-						xray.Handler(xray.NewFixedSegmentNamer(fmt.Sprintf("%s%s%s", "payfee:", h.httpAppServer.InfoPod.AvailabilityZone, "./key/get")),
+						xray.Handler(xray.NewFixedSegmentNamer(fmt.Sprintf("%s%s%s", "payfee:", appServer.InfoPod.AvailabilityZone, "./key/get")),
 						http.HandlerFunc(httpWorkerAdapter.GetKey),
 						),
 	)
 
 	addScript := myRouter.Methods(http.MethodPost, http.MethodOptions).Subrouter()
 	addScript.Handle("/script/add", 
-						xray.Handler(xray.NewFixedSegmentNamer(fmt.Sprintf("%s%s%s", "payfee:", h.httpAppServer.InfoPod.AvailabilityZone, "./script/add")), 
+						xray.Handler(xray.NewFixedSegmentNamer(fmt.Sprintf("%s%s%s", "payfee:", appServer.InfoPod.AvailabilityZone, "./script/add")), 
 						http.HandlerFunc(httpWorkerAdapter.AddScript),
 						),
 	)
 
 	getScript := myRouter.Methods(http.MethodGet, http.MethodOptions).Subrouter()
 	getScript.Handle("/script/get/{id}",
-						xray.Handler(xray.NewFixedSegmentNamer(fmt.Sprintf("%s%s%s", "payfee:", h.httpAppServer.InfoPod.AvailabilityZone, "./script/get")),
+						xray.Handler(xray.NewFixedSegmentNamer(fmt.Sprintf("%s%s%s", "payfee:", appServer.InfoPod.AvailabilityZone, "./script/get")),
 						http.HandlerFunc(httpWorkerAdapter.GetScript),
 						),
 	)
 
 	srv := http.Server{
-		Addr:         ":" +  strconv.Itoa(h.httpAppServer.Server.Port),      	
+		Addr:         ":" +  strconv.Itoa(h.httpServer.Port),      	
 		Handler:      myRouter,                	          
-		ReadTimeout:  time.Duration(h.httpAppServer.Server.ReadTimeout) * time.Second,   
-		WriteTimeout: time.Duration(h.httpAppServer.Server.WriteTimeout) * time.Second,  
-		IdleTimeout:  time.Duration(h.httpAppServer.Server.IdleTimeout) * time.Second, 
+		ReadTimeout:  time.Duration(h.httpServer.ReadTimeout) * time.Second,   
+		WriteTimeout: time.Duration(h.httpServer.WriteTimeout) * time.Second,  
+		IdleTimeout:  time.Duration(h.httpServer.IdleTimeout) * time.Second, 
 	}
 
-	childLogger.Info().Str("Service Port : ", strconv.Itoa(h.httpAppServer.Server.Port)).Msg("Service Port")
+	childLogger.Info().Str("Service Port : ", strconv.Itoa(h.httpServer.Port)).Msg("Service Port")
 
 	go func() {
 		err := srv.ListenAndServe()

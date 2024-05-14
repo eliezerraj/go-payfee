@@ -6,8 +6,8 @@ metadata:
   labels:
     app: *app-name
 data:
-  API_VERSION: "1.0"
-  POD_NAME: "go-payfee"
+  API_VERSION: "2.0"
+  POD_NAME: "go-payfee.k8"
   PORT: "5004"
-  NO_AZ: "true"
+  SETPOD_AZ: "false"
   REDIS_CLUSTER_ADDRESS: "clustercfg.memdb-arch.vovqz2.memorydb.us-east-2.amazonaws.com:6379"
