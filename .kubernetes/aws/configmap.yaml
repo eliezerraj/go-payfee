@@ -6,7 +6,7 @@ metadata:
   labels:
     app: *app-name
 data:
-  API_VERSION: "2.0"
+  API_VERSION: "2.1"
   POD_NAME: "go-payfee.k8"
   PORT: "5004"
   SETPOD_AZ: "false"

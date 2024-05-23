@@ -13,6 +13,20 @@ import (
 
 var childLogger = log.With().Str("handler", "handler").Logger()
 
+func MiddleWareHandlerHeader(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		childLogger.Debug().Msg("-------------- MiddleWareHandlerHeader (INICIO)  --------------")
+	
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Headers","Content-Type,access-control-allow-origin, access-control-allow-headers")
+
+		childLogger.Debug().Msg("-------------- MiddleWareHandlerHeader (FIM) ----------------")
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func (h *HttpWorkerAdapter) Health(rw http.ResponseWriter, req *http.Request) {
 	childLogger.Debug().Msg("Health")
 
@@ -58,6 +72,8 @@ func (h *HttpWorkerAdapter) GetScript(rw http.ResponseWriter, req *http.Request)
 			return
 		}
 	}
+
+	//rw.Header().Set("Content-Type", "application/json")
 
 	json.NewEncoder(rw).Encode(res)
 	return

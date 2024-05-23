@@ -37,7 +37,10 @@ func main() {
 	log.Debug().Msg("----------------------------------------------------")
 	log.Debug().Msg("main")
 	log.Debug().Msg("----------------------------------------------------")
-	log.Debug().Interface("appServer :",appServer).Msg("")
+	log.Debug().Interface("appServer.InfoPod :",appServer.InfoPod).Msg("")
+	log.Debug().Interface("appServer.RedisAddress :",appServer.RedisAddress).Msg("")
+	log.Debug().Interface("appServer.Server :",appServer.Server).Msg("")
+	log.Debug().Interface("appServer.ConfigOTEL :",appServer.ConfigOTEL).Msg("")
 	log.Debug().Msg("----------------------------------------------------")
 
 	ctx, cancel := context.WithTimeout(	context.Background(), 

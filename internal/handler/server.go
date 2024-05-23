@@ -47,6 +47,7 @@ func (h HttpServer) StartHttpAppServer(	ctx context.Context,
 	childLogger.Info().Msg("StartHttpAppServer")
 
 	myRouter := mux.NewRouter().StrictSlash(true)
+	myRouter.Use(MiddleWareHandlerHeader)
 
 	myRouter.HandleFunc("/", func(rw http.ResponseWriter, req *http.Request) {
 		childLogger.Debug().Msg("/")
@@ -76,7 +77,6 @@ func (h HttpServer) StartHttpAppServer(	ctx context.Context,
 	header := myRouter.Methods(http.MethodGet, http.MethodOptions).Subrouter()
     header.HandleFunc("/header", httpWorkerAdapter.Header)
 
-
 	setKey := myRouter.Methods(http.MethodPost, http.MethodOptions).Subrouter()
 	setKey.Handle("/key/add", 
 						xray.Handler(xray.NewFixedSegmentNamer(fmt.Sprintf("%s%s%s", "payfee:", appServer.InfoPod.AvailabilityZone, "./key/add")), 
@@ -90,7 +90,7 @@ func (h HttpServer) StartHttpAppServer(	ctx context.Context,
 						http.HandlerFunc(httpWorkerAdapter.GetKey),
 						),
 	)
-
+	
 	addScript := myRouter.Methods(http.MethodPost, http.MethodOptions).Subrouter()
 	addScript.Handle("/script/add", 
 						xray.Handler(xray.NewFixedSegmentNamer(fmt.Sprintf("%s%s%s", "payfee:", appServer.InfoPod.AvailabilityZone, "./script/add")), 
