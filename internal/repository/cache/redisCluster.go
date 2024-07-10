@@ -6,8 +6,9 @@ import (
 	"github.com/rs/zerolog/log"
 
 	redis "github.com/redis/go-redis/v9"
-	"github.com/go-payfee/internal/lib"
 
+	"github.com/go-payfee/internal/lib"
+	"github.com/go-payfee/internal/erro"
 )
 
 var childLogger = log.With().Str("repository/cache", "Redis").Logger()
@@ -112,7 +113,7 @@ func (s *CacheService) AddKey(ctx context.Context, key string, valueReg interfac
 }
 
 func (s *CacheService) GetKey(ctx context.Context,key string) (interface{}, error) {
-	childLogger.Debug().Msg("GetKey")
+	childLogger.Debug().Msg("GetKey:" + key)
 
 	span := lib.Span(ctx, "redis.GetKey")	
     defer span.End()
@@ -120,7 +121,7 @@ func (s *CacheService) GetKey(ctx context.Context,key string) (interface{}, erro
 	result, err := s.cache.Get(ctx, key).Result()
 	if err != nil {
 		childLogger.Error().Err(err).Msg("GetKey")
-		return nil, err
+		return nil, erro.ErrNotFound
 	}
 
 	return result, nil

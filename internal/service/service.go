@@ -101,6 +101,7 @@ func (s *RedisService) GetKey(ctx context.Context, fee core.Fee) (*core.Fee, err
 
 	// Get to the cache
 	key := "fee:" + fee.Name
+	
 	res, err := s.cacheRedis.GetKey(ctx, key)
 	if err != nil {
 		childLogger.Error().Err(err).Msg(".")
