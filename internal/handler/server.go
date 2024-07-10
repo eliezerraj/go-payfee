@@ -9,15 +9,18 @@ import (
 	"os/signal"
 	"syscall"
 	"context"
-	"fmt"
 
 	"github.com/gorilla/mux"
 
 	"github.com/go-payfee/internal/service"
 	"github.com/go-payfee/internal/core"
-	"github.com/aws/aws-xray-sdk-go/xray"
+	"github.com/go-payfee/internal/lib"
 
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/contrib/propagators/aws/xray"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
 )
+
 //----------------------------------------------------------------
 type HttpWorkerAdapter struct {
 	workerService 	*service.RedisService
@@ -45,6 +48,18 @@ func (h HttpServer) StartHttpAppServer(	ctx context.Context,
 										httpWorkerAdapter *HttpWorkerAdapter,
 										appServer *core.AppServer) {
 	childLogger.Info().Msg("StartHttpAppServer")
+	// ---------------------- OTEL ---------------
+	childLogger.Info().Str("OTEL_EXPORTER_OTLP_ENDPOINT :", appServer.ConfigOTEL.OtelExportEndpoint).Msg("")
+	
+	tp := lib.NewTracerProvider(ctx, appServer.ConfigOTEL, appServer.InfoPod)
+	defer func() { 
+		err := tp.Shutdown(ctx)
+		if err != nil{
+			childLogger.Error().Err(err).Msg("Erro closing OTEL tracer !!!")
+		}
+	}()
+	otel.SetTextMapPropagator(xray.Propagator{})
+	otel.SetTracerProvider(tp)
 
 	myRouter := mux.NewRouter().StrictSlash(true)
 	myRouter.Use(MiddleWareHandlerHeader)
@@ -76,34 +91,27 @@ func (h HttpServer) StartHttpAppServer(	ctx context.Context,
 
 	header := myRouter.Methods(http.MethodGet, http.MethodOptions).Subrouter()
     header.HandleFunc("/header", httpWorkerAdapter.Header)
+	header.Use(otelmux.Middleware("go-payfee"))
 
 	setKey := myRouter.Methods(http.MethodPost, http.MethodOptions).Subrouter()
 	setKey.Handle("/key/add", 
-						xray.Handler(xray.NewFixedSegmentNamer(fmt.Sprintf("%s%s%s", "payfee:", appServer.InfoPod.AvailabilityZone, "./key/add")), 
-						http.HandlerFunc(httpWorkerAdapter.AddKey),
-						),
-	)
+						http.HandlerFunc(httpWorkerAdapter.AddKey),)
+	setKey.Use(otelmux.Middleware("go-payfee"))
 
 	getKey := myRouter.Methods(http.MethodGet, http.MethodOptions).Subrouter()
 	getKey.Handle("/key/get/{id}",
-						xray.Handler(xray.NewFixedSegmentNamer(fmt.Sprintf("%s%s%s", "payfee:", appServer.InfoPod.AvailabilityZone, "./key/get")),
-						http.HandlerFunc(httpWorkerAdapter.GetKey),
-						),
-	)
-	
+						http.HandlerFunc(httpWorkerAdapter.GetKey),)
+	getKey.Use(otelmux.Middleware("go-payfee"))
+
 	addScript := myRouter.Methods(http.MethodPost, http.MethodOptions).Subrouter()
 	addScript.Handle("/script/add", 
-						xray.Handler(xray.NewFixedSegmentNamer(fmt.Sprintf("%s%s%s", "payfee:", appServer.InfoPod.AvailabilityZone, "./script/add")), 
-						http.HandlerFunc(httpWorkerAdapter.AddScript),
-						),
-	)
+						http.HandlerFunc(httpWorkerAdapter.AddScript),)
+	addScript.Use(otelmux.Middleware("go-payfee"))
 
 	getScript := myRouter.Methods(http.MethodGet, http.MethodOptions).Subrouter()
 	getScript.Handle("/script/get/{id}",
-						xray.Handler(xray.NewFixedSegmentNamer(fmt.Sprintf("%s%s%s", "payfee:", appServer.InfoPod.AvailabilityZone, "./script/get")),
-						http.HandlerFunc(httpWorkerAdapter.GetScript),
-						),
-	)
+						http.HandlerFunc(httpWorkerAdapter.GetScript),)
+						getScript.Use(otelmux.Middleware("go-payfee"))
 
 	srv := http.Server{
 		Addr:         ":" +  strconv.Itoa(h.httpServer.Port),      	

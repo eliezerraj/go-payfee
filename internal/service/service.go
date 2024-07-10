@@ -11,8 +11,7 @@ import (
 		"github.com/rs/zerolog/log"
 		"github.com/go-payfee/internal/repository/cache"
 		"github.com/go-payfee/internal/core"
-
-		"github.com/aws/aws-xray-sdk-go/xray"
+		"github.com/go-payfee/internal/lib"
 )
 
 var childLogger = log.With().Str("service", "RedisService").Logger()
@@ -32,10 +31,8 @@ func NewRBACService(cacheRedis *cache.CacheService) *RedisService{
 func (s *RedisService) AddScript(ctx context.Context, script core.ScriptData) (bool, error) {
 	childLogger.Debug().Msg("addScript")
 
-	_, root := xray.BeginSubsegment(ctx, "PayFee.addScript")
-	defer func() {
-		root.Close(nil)
-	}()
+	span := lib.Span(ctx, "service.addScript")
+	span.End()
 
 	// Put to the cache
 	key := "script:" + script.Script.Name
@@ -52,10 +49,8 @@ func (s *RedisService) AddScript(ctx context.Context, script core.ScriptData) (b
 func (s *RedisService) GetScript(ctx context.Context, script core.ScriptData) (*core.Script, error) {
 	childLogger.Debug().Msg("GetScript")
 
-	_, root := xray.BeginSubsegment(ctx, "PayFee.GetScript")
-	defer func() {
-		root.Close(nil)
-	}()
+	span := lib.Span(ctx, "service.GetScript")
+	span.End()
 
 	// Get to the cache
 	key := "script:"+ script.Script.Name
@@ -82,10 +77,8 @@ func (s *RedisService) GetScript(ctx context.Context, script core.ScriptData) (*
 func (s *RedisService) AddKey(ctx context.Context, fee core.Fee) (bool, error) {
 	childLogger.Debug().Msg("AddKey")
 
-	_, root := xray.BeginSubsegment(ctx, "PayFee.AddKey")
-	defer func() {
-		root.Close(nil)
-	}()
+	span := lib.Span(ctx, "service.AddKey")
+	span.End()
 
 	// Put to the cache
 	key := "fee:" + fee.Name
@@ -103,10 +96,8 @@ func (s *RedisService) AddKey(ctx context.Context, fee core.Fee) (bool, error) {
 func (s *RedisService) GetKey(ctx context.Context, fee core.Fee) (*core.Fee, error) {
 	childLogger.Debug().Msg("GetKey")
 
-	_, root := xray.BeginSubsegment(ctx, "PayFee.GetKey")
-	defer func() {
-		root.Close(nil)
-	}()
+	span := lib.Span(ctx, "service.GetKey")
+	span.End()
 
 	// Get to the cache
 	key := "fee:" + fee.Name

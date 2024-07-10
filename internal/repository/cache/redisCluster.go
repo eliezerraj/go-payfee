@@ -6,7 +6,8 @@ import (
 	"github.com/rs/zerolog/log"
 
 	redis "github.com/redis/go-redis/v9"
-	"github.com/aws/aws-xray-sdk-go/xray"
+	"github.com/go-payfee/internal/lib"
+
 )
 
 var childLogger = log.With().Str("repository/cache", "Redis").Logger()
@@ -38,10 +39,8 @@ func (s *CacheService) Ping(ctx context.Context) (string, error) {
 func (s *CacheService) Get(ctx context.Context, key string) (interface{}, error) {
 	childLogger.Debug().Msg("Get")
 
-	_, root := xray.BeginSubsegment(ctx, "REDIS.Get")
-	defer func() {
-		root.Close(nil)
-	}()
+	span := lib.Span(ctx, "redis.Get")	
+    defer span.End()
 
 	res, err := s.cache.Get(ctx, key).Result()
 	if err != nil {
@@ -55,10 +54,8 @@ func (s *CacheService) Put(ctx context.Context, key string, value interface{}) e
 	childLogger.Debug().Msg("Put")
 	//childLogger.Debug().Str("====> key : ",key).Interface("| Put : ",value).Msg("")
 
-	_, root := xray.BeginSubsegment(ctx, "REDIS.Put")
-	defer func() {
-		root.Close(nil)
-	}()
+	span := lib.Span(ctx, "redis.Put")	
+    defer span.End()
 
 	value_json, err := json.Marshal(value)
     if err != nil {
@@ -73,10 +70,8 @@ func (s *CacheService) Put(ctx context.Context, key string, value interface{}) e
 func (s *CacheService) SetCount(ctx context.Context, key string, valueReg string, value interface{}) (error) {
 	childLogger.Debug().Msg("Count")
 
-	_, root := xray.BeginSubsegment(ctx, "REDIS.HIncrByFloat")
-	defer func() {
-		root.Close(nil)
-	}()
+	span := lib.Span(ctx, "redis.SetCount")	
+    defer span.End()
 
 	_, err := s.cache.HIncrByFloat(ctx, key, valueReg, value.(float64)).Result()
 	if err != nil {
@@ -90,10 +85,8 @@ func (s *CacheService) SetCount(ctx context.Context, key string, valueReg string
 func (s *CacheService) GetCount(ctx context.Context, key string, valueReg string) (interface{}, error) {
 	childLogger.Debug().Msg("GetCount")
 
-	_, root := xray.BeginSubsegment(ctx, "REDIS.HGet")
-	defer func() {
-		root.Close(nil)
-	}()
+	span := lib.Span(ctx, "redis.GetCount")	
+    defer span.End()
 
 	res, err := s.cache.HGet(ctx, key, valueReg).Result()
 	if err != nil {
@@ -106,10 +99,8 @@ func (s *CacheService) GetCount(ctx context.Context, key string, valueReg string
 func (s *CacheService) AddKey(ctx context.Context, key string, valueReg interface{}) (bool, error) {
 	childLogger.Debug().Msg("AddKey")
 
-	_, root := xray.BeginSubsegment(ctx, "REDIS.Set")
-	defer func() {
-		root.Close(nil)
-	}()
+	span := lib.Span(ctx, "redis.AddKey")	
+    defer span.End()
 
 	err := s.cache.Set(ctx, key, valueReg , 0).Err()
 	if err != nil {
@@ -123,10 +114,8 @@ func (s *CacheService) AddKey(ctx context.Context, key string, valueReg interfac
 func (s *CacheService) GetKey(ctx context.Context,key string) (interface{}, error) {
 	childLogger.Debug().Msg("GetKey")
 
-	_, root := xray.BeginSubsegment(ctx, "REDIS.Get")
-	defer func() {
-		root.Close(nil)
-	}()
+	span := lib.Span(ctx, "redis.GetKey")	
+    defer span.End()
 
 	result, err := s.cache.Get(ctx, key).Result()
 	if err != nil {
