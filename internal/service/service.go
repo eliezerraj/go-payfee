@@ -32,7 +32,7 @@ func (s *RedisService) AddScript(ctx context.Context, script core.ScriptData) (b
 	childLogger.Debug().Msg("addScript")
 
 	span := lib.Span(ctx, "service.addScript")
-	span.End()
+	defer span.End()
 
 	// Put to the cache
 	key := "script:" + script.Script.Name
@@ -50,7 +50,7 @@ func (s *RedisService) GetScript(ctx context.Context, script core.ScriptData) (*
 	childLogger.Debug().Msg("GetScript")
 
 	span := lib.Span(ctx, "service.GetScript")
-	span.End()
+	defer span.End()
 
 	// Get to the cache
 	key := "script:"+ script.Script.Name
@@ -78,7 +78,7 @@ func (s *RedisService) AddKey(ctx context.Context, fee core.Fee) (bool, error) {
 	childLogger.Debug().Msg("AddKey")
 
 	span := lib.Span(ctx, "service.AddKey")
-	span.End()
+	defer span.End()
 
 	// Put to the cache
 	key := "fee:" + fee.Name
@@ -97,7 +97,7 @@ func (s *RedisService) GetKey(ctx context.Context, fee core.Fee) (*core.Fee, err
 	childLogger.Debug().Msg("GetKey")
 
 	span := lib.Span(ctx, "service.GetKey")
-	span.End()
+	defer span.End()
 
 	// Get to the cache
 	key := "fee:" + fee.Name

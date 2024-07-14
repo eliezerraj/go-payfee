@@ -12,3 +12,4 @@ data:
   SETPOD_AZ: "false"
   REDIS_CLUSTER_ADDRESS: "clustercfg.memdb-arch.vovqz2.memorydb.us-east-2.amazonaws.com:6379"
   OTEL_EXPORTER_OTLP_ENDPOINT: "arch-eks-01-xray-collector.default.svc.cluster.local:4317"
+  ENV: "dev"

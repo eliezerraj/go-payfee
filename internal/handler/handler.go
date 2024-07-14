@@ -8,7 +8,7 @@ import (
 
 	"github.com/go-payfee/internal/core"
 	"github.com/go-payfee/internal/erro"
-	
+	"github.com/go-payfee/internal/lib"
 )
 
 var childLogger = log.With().Str("handler", "handler").Logger()
@@ -53,6 +53,9 @@ func (h *HttpWorkerAdapter) Header(rw http.ResponseWriter, req *http.Request) {
 func (h *HttpWorkerAdapter) GetScript(rw http.ResponseWriter, req *http.Request) {
 	childLogger.Debug().Msg("GetScript")
 
+	span := lib.Span(req.Context(), "handler.GetScript")
+	defer span.End()
+
 	vars := mux.Vars(req)
 	varID := vars["id"]
 
@@ -82,6 +85,9 @@ func (h *HttpWorkerAdapter) GetScript(rw http.ResponseWriter, req *http.Request)
 func (h *HttpWorkerAdapter) AddScript( rw http.ResponseWriter, req *http.Request) {
 	childLogger.Debug().Msg("AddScript")
 
+	span := lib.Span(req.Context(), "handler.AddScript")
+	defer span.End()
+
 	script := core.ScriptData{}
 	err := json.NewDecoder(req.Body).Decode(&script)
     if err != nil {
@@ -106,6 +112,9 @@ func (h *HttpWorkerAdapter) AddScript( rw http.ResponseWriter, req *http.Request
 
 func (h *HttpWorkerAdapter) GetKey(rw http.ResponseWriter, req *http.Request) {
 	childLogger.Debug().Msg("GetKey")
+
+	span := lib.Span(req.Context(), "handler.GetKey")
+	defer span.End()
 
 	vars := mux.Vars(req)
 	varID := vars["id"]
@@ -133,6 +142,9 @@ func (h *HttpWorkerAdapter) GetKey(rw http.ResponseWriter, req *http.Request) {
 
 func (h *HttpWorkerAdapter) AddKey( rw http.ResponseWriter, req *http.Request) {
 	childLogger.Debug().Msg("SetKey")
+
+	span := lib.Span(req.Context(), "handler.SetKey")
+	defer span.End()
 
 	fee := core.Fee{}
 	err := json.NewDecoder(req.Body).Decode(&fee)
