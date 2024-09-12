@@ -1,4 +1,4 @@
-package handler
+package controller
 
 import (	
 	"net/http"
@@ -6,25 +6,36 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/gorilla/mux"
 
+	"github.com/go-payfee/internal/service"
 	"github.com/go-payfee/internal/core"
 	"github.com/go-payfee/internal/erro"
 	"github.com/go-payfee/internal/lib"
 )
 
-var childLogger = log.With().Str("handler", "handler").Logger()
+var childLogger = log.With().Str("handler", "controller").Logger()
 
-func MiddleWareHandlerHeader(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		childLogger.Debug().Msg("-------------- MiddleWareHandlerHeader (INICIO)  --------------")
+type APIError struct {
+	StatusCode	int  `json:"statusCode"`
+	Msg			any `json:"msg"`
+}
+
+func NewAPIError(statusCode int, err error) APIError {
+	return APIError{
+		StatusCode: statusCode,
+		Msg:		err.Error(),
+	}
+}
+
+type HttpWorkerAdapter struct {
+	workerService 	*service.RedisService
+}
+
+func NewHttpWorkerAdapter(workerService *service.RedisService) HttpWorkerAdapter {
+	childLogger.Debug().Msg("NewHttpWorkerAdapter")
 	
-		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Headers","Content-Type,access-control-allow-origin, access-control-allow-headers")
-
-		childLogger.Debug().Msg("-------------- MiddleWareHandlerHeader (FIM) ----------------")
-
-		next.ServeHTTP(w, r)
-	})
+	return HttpWorkerAdapter{
+		workerService: workerService,
+	}
 }
 
 func (h *HttpWorkerAdapter) Health(rw http.ResponseWriter, req *http.Request) {
@@ -64,16 +75,16 @@ func (h *HttpWorkerAdapter) GetScript(rw http.ResponseWriter, req *http.Request)
 	
 	res, err := h.workerService.GetScript(req.Context(), script)
 	if err != nil {
+		var apiError APIError
 		switch err {
-		case erro.ErrNotFound:
-			rw.WriteHeader(404)
-			json.NewEncoder(rw).Encode(err.Error())
-			return
-		default:
-			rw.WriteHeader(500)
-			json.NewEncoder(rw).Encode(err.Error())
-			return
+			case erro.ErrNotFound:
+				apiError = NewAPIError(404, err)
+			default:
+				apiError = NewAPIError(500, err)
 		}
+		rw.WriteHeader(apiError.StatusCode)
+		json.NewEncoder(rw).Encode(apiError)
+		return
 	}
 
 	//rw.Header().Set("Content-Type", "application/json")
@@ -91,19 +102,22 @@ func (h *HttpWorkerAdapter) AddScript( rw http.ResponseWriter, req *http.Request
 	script := core.ScriptData{}
 	err := json.NewDecoder(req.Body).Decode(&script)
     if err != nil {
-		rw.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(rw).Encode(erro.ErrUnmarshal.Error())
-        return
+		apiError := NewAPIError(400, erro.ErrUnmarshal)
+		rw.WriteHeader(apiError.StatusCode)
+		json.NewEncoder(rw).Encode(apiError)
+		return
     }
 
 	res, err := h.workerService.AddScript(req.Context(), script)
 	if err != nil {
+		var apiError APIError
 		switch err {
-		default:
-			rw.WriteHeader(500)
-			json.NewEncoder(rw).Encode(err.Error())
-			return
+			default:
+				apiError = NewAPIError(500, err)
 		}
+		rw.WriteHeader(apiError.StatusCode)
+		json.NewEncoder(rw).Encode(apiError)
+		return
 	}
 
 	json.NewEncoder(rw).Encode(res)
@@ -124,16 +138,16 @@ func (h *HttpWorkerAdapter) GetKey(rw http.ResponseWriter, req *http.Request) {
 	
 	res, err := h.workerService.GetKey(req.Context(), fee)
 	if err != nil {
+		var apiError APIError
 		switch err {
-		case erro.ErrNotFound:
-			rw.WriteHeader(404)
-			json.NewEncoder(rw).Encode(err.Error())
-			return
-		default:
-			rw.WriteHeader(500)
-			json.NewEncoder(rw).Encode(err.Error())
-			return
+			case erro.ErrNotFound:
+				apiError = NewAPIError(404, err)
+			default:
+				apiError = NewAPIError(500, err)
 		}
+		rw.WriteHeader(apiError.StatusCode)
+		json.NewEncoder(rw).Encode(apiError)
+		return
 	}
 
 	json.NewEncoder(rw).Encode(res)
@@ -149,19 +163,22 @@ func (h *HttpWorkerAdapter) AddKey( rw http.ResponseWriter, req *http.Request) {
 	fee := core.Fee{}
 	err := json.NewDecoder(req.Body).Decode(&fee)
     if err != nil {
-		rw.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(rw).Encode(erro.ErrUnmarshal.Error())
-        return
+		apiError := NewAPIError(400, erro.ErrUnmarshal)
+		rw.WriteHeader(apiError.StatusCode)
+		json.NewEncoder(rw).Encode(apiError)
+		return
     }
 
 	res, err := h.workerService.AddKey(req.Context(), fee)
 	if err != nil {
+		var apiError APIError
 		switch err {
-		default:
-			rw.WriteHeader(500)
-			json.NewEncoder(rw).Encode(err.Error())
-			return
+			default:
+				apiError = NewAPIError(500, err)
 		}
+		rw.WriteHeader(apiError.StatusCode)
+		json.NewEncoder(rw).Encode(apiError)
+		return
 	}
 
 	json.NewEncoder(rw).Encode(res)

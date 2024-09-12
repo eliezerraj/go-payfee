@@ -11,28 +11,19 @@ import (
 	"context"
 
 	"github.com/gorilla/mux"
-
-	"github.com/go-payfee/internal/service"
+	"github.com/rs/zerolog/log"
 	"github.com/go-payfee/internal/core"
 	"github.com/go-payfee/internal/lib"
+	"github.com/go-payfee/internal/handler/utils/middleware"
+	"github.com/go-payfee/internal/handler/controller"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/contrib/propagators/aws/xray"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
 )
 
-//----------------------------------------------------------------
-type HttpWorkerAdapter struct {
-	workerService 	*service.RedisService
-}
+var childLogger = log.With().Str("handler", "server").Logger()
 
-func NewHttpWorkerAdapter(workerService *service.RedisService) HttpWorkerAdapter {
-	childLogger.Debug().Msg("NewHttpWorkerAdapter")
-	
-	return HttpWorkerAdapter{
-		workerService: workerService,
-	}
-}
 //------------------------------------------------------
 type HttpServer struct {
 	httpServer	*core.Server
@@ -45,7 +36,7 @@ func NewHttpAppServer(httpServer *core.Server) HttpServer {
 }
 //-------------------------------------------------
 func (h HttpServer) StartHttpAppServer(	ctx context.Context, 
-										httpWorkerAdapter *HttpWorkerAdapter,
+										httpWorkerAdapter *controller.HttpWorkerAdapter,
 										appServer *core.AppServer) {
 	childLogger.Info().Msg("StartHttpAppServer")
 	// ---------------------- OTEL ---------------
@@ -62,7 +53,7 @@ func (h HttpServer) StartHttpAppServer(	ctx context.Context,
 	otel.SetTracerProvider(tp)
 
 	myRouter := mux.NewRouter().StrictSlash(true)
-	myRouter.Use(MiddleWareHandlerHeader)
+	myRouter.Use(middleware.MiddleWareHandlerHeader)
 
 	myRouter.HandleFunc("/", func(rw http.ResponseWriter, req *http.Request) {
 		childLogger.Debug().Msg("/")

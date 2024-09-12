@@ -11,7 +11,7 @@ import (
 	"github.com/go-payfee/internal/erro"
 )
 
-var childLogger = log.With().Str("repository/cache", "Redis").Logger()
+var childLogger = log.With().Str("repository.cache", "Redis").Logger()
 
 type CacheService struct {
 	cache *redis.ClusterClient
