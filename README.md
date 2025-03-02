@@ -10,7 +10,7 @@ Redis Cluster Database (aws MemoryDB)
 
 ## Endpoints
 
-+ POST /script/add
++ POST /add/script
 
         {
         "script": {
@@ -20,9 +20,9 @@ Redis Cluster Database (aws MemoryDB)
             }
         }
 
-+ GET /script/get/script.debit
++ GET /script/script.debit
 
-+ POST /key/add
++ POST /add/key
 
         {
             "name":"fee-3.5",

@@ -1,4 +1,4 @@
-package util
+package configuration
 
 import(
 	"os"
@@ -6,11 +6,12 @@ import(
 
 	"crypto/tls"
 	"github.com/joho/godotenv"
-	"github.com/go-payfee/internal/core"
+	"github.com/go-payfee/internal/core/model"
+	
 	redis "github.com/redis/go-redis/v9"
 )
 
-func GetDatabaseEnv() core.DatabaseRedis {
+func GetRedisEnv() model.DatabaseRedis {
 	childLogger.Debug().Msg("GetDatabaseEnv")
 
 	err := godotenv.Load(".env")
@@ -18,7 +19,7 @@ func GetDatabaseEnv() core.DatabaseRedis {
 		childLogger.Info().Err(err).Msg("No .env File !!!!")
 	}
 	
-	var databaseRedis		core.DatabaseRedis
+	var databaseRedis		model.DatabaseRedis
 	var envCacheCluster		redis.ClusterOptions
 
 	envCacheCluster.Username = ""
