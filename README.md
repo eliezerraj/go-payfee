@@ -10,6 +10,8 @@ Redis Cluster Database (aws MemoryDB)
 
 ## Endpoints
 
++ GET /info
+
 + POST /add/script
 
         {
@@ -29,4 +31,4 @@ Redis Cluster Database (aws MemoryDB)
             "value": 3.5
         }
 
-+ GET /key/get/fee-3.5
++ GET /key/fee-3.5

@@ -22,6 +22,7 @@ var(
 	redisClusterServer 	go_core_cache.RedisClusterServer
 )
 
+// About initialize the enviroment var
 func init(){
 	log.Debug().Msg("init")
 	zerolog.SetGlobalLevel(logLevel)
@@ -36,9 +37,12 @@ func init(){
 	appServer.DatabaseRedis = &databaseRedis
 }
 
+
+// About main
 func main (){
 	log.Debug().Msg("----------------------------------------------------")
 	log.Debug().Msg("main")
+	log.Debug().Interface("appServer: ",appServer.InfoPod).Msg("")
 	log.Debug().Msg("----------------------------------------------------")
 
 	ctx, cancel := context.WithTimeout(	context.Background(), 
@@ -54,11 +58,12 @@ func main (){
 	}
 	log.Debug().Msg(" ===> Redis Ping Sucessful !!! <===")
 
-	log.Debug().Interface("appServer: ",appServer.InfoPod).Msg("")
-
+	// wire	
 	workerRepository := cache.NewWorkerRepository(cacheRedis)
 	workerService := service.NewWorkerService(workerRepository)
 	httpRouters := api.NewHttpRouters(workerService)
 	httpServer := server.NewHttpAppServer(appServer.Server)
+
+	// start server
 	httpServer.StartHttpAppServer(ctx, &httpRouters, &appServer)
 }

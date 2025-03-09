@@ -11,6 +11,7 @@ import(
 	redis "github.com/redis/go-redis/v9"
 )
 
+// About get redis env var
 func GetRedisEnv() model.DatabaseRedis {
 	childLogger.Debug().Msg("GetDatabaseEnv")
 

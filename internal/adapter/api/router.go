@@ -29,6 +29,7 @@ func NewHttpRouters(workerService *service.WorkerService) HttpRouters {
 	}
 }
 
+// About return a health
 func (h *HttpRouters) Health(rw http.ResponseWriter, req *http.Request) {
 	childLogger.Debug().Msg("Health")
 
@@ -36,6 +37,7 @@ func (h *HttpRouters) Health(rw http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(rw).Encode(health)
 }
 
+// About return a live
 func (h *HttpRouters) Live(rw http.ResponseWriter, req *http.Request) {
 	childLogger.Debug().Msg("Live")
 
@@ -43,12 +45,14 @@ func (h *HttpRouters) Live(rw http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(rw).Encode(live)
 }
 
+// About show all header received
 func (h *HttpRouters) Header(rw http.ResponseWriter, req *http.Request) {
 	childLogger.Debug().Msg("Header")
 	
 	json.NewEncoder(rw).Encode(req.Header)
 }
 
+// About get all script
 func (h *HttpRouters) GetScript(rw http.ResponseWriter, req *http.Request) error {
 	childLogger.Debug().Msg("AddPerson")
 
@@ -75,6 +79,7 @@ func (h *HttpRouters) GetScript(rw http.ResponseWriter, req *http.Request) error
 	return core_json.WriteJSON(rw, http.StatusOK, res)
 }
 
+// About add script
 func (h *HttpRouters) AddScript(rw http.ResponseWriter, req *http.Request) error {
 	childLogger.Debug().Msg("GetPerson")
 
@@ -103,6 +108,7 @@ func (h *HttpRouters) AddScript(rw http.ResponseWriter, req *http.Request) error
 	return core_json.WriteJSON(rw, http.StatusOK, res)
 }
 
+// About get key
 func (h *HttpRouters) GetKey(rw http.ResponseWriter, req *http.Request) error {
 	childLogger.Debug().Msg("UpdatePerson")
 
@@ -129,6 +135,7 @@ func (h *HttpRouters) GetKey(rw http.ResponseWriter, req *http.Request) error {
 	return core_json.WriteJSON(rw, http.StatusOK, res)
 }
 
+// About add key
 func (h *HttpRouters) AddKey(rw http.ResponseWriter, req *http.Request) error {
 	childLogger.Debug().Msg("ListPerson")
 
