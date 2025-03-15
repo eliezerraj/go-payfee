@@ -89,7 +89,7 @@ func (h *HttpRouters) AddScript(rw http.ResponseWriter, req *http.Request) error
 	script := model.ScriptData{}
 	err := json.NewDecoder(req.Body).Decode(&script)
     if err != nil {
-		core_apiError = core_apiError.NewAPIError(erro.ErrUnmarshal, http.StatusBadRequest)
+		core_apiError = core_apiError.NewAPIError(err, http.StatusBadRequest)
 		return &core_apiError
     }
 	defer req.Body.Close()
@@ -145,7 +145,7 @@ func (h *HttpRouters) AddKey(rw http.ResponseWriter, req *http.Request) error {
 	fee := model.Fee{}
 	err := json.NewDecoder(req.Body).Decode(&fee)
     if err != nil {
-		core_apiError = core_apiError.NewAPIError(erro.ErrUnmarshal, http.StatusBadRequest)
+		core_apiError = core_apiError.NewAPIError(err, http.StatusBadRequest)
 		return &core_apiError
     }
 	defer req.Body.Close()
