@@ -31,7 +31,7 @@ func NewHttpRouters(workerService *service.WorkerService) HttpRouters {
 
 // About return a health
 func (h *HttpRouters) Health(rw http.ResponseWriter, req *http.Request) {
-	childLogger.Debug().Msg("Health")
+	childLogger.Info().Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Msg("Health")
 
 	health := true
 	json.NewEncoder(rw).Encode(health)
@@ -39,7 +39,7 @@ func (h *HttpRouters) Health(rw http.ResponseWriter, req *http.Request) {
 
 // About return a live
 func (h *HttpRouters) Live(rw http.ResponseWriter, req *http.Request) {
-	childLogger.Debug().Msg("Live")
+	childLogger.Info().Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Msg("Live")
 
 	live := true
 	json.NewEncoder(rw).Encode(live)
@@ -47,16 +47,16 @@ func (h *HttpRouters) Live(rw http.ResponseWriter, req *http.Request) {
 
 // About show all header received
 func (h *HttpRouters) Header(rw http.ResponseWriter, req *http.Request) {
-	childLogger.Debug().Msg("Header")
+	childLogger.Info().Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Msg("Header")
 	
 	json.NewEncoder(rw).Encode(req.Header)
 }
 
 // About get all script
 func (h *HttpRouters) GetScript(rw http.ResponseWriter, req *http.Request) error {
-	childLogger.Debug().Msg("AddPerson")
+	childLogger.Info().Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Msg("GetScript")
 
-	span := tracerProvider.Span(req.Context(), "adapter.api.AddPerson")
+	span := tracerProvider.Span(req.Context(), "adapter.api.GetScript")
 	defer span.End()
 
 	vars := mux.Vars(req)
@@ -81,9 +81,9 @@ func (h *HttpRouters) GetScript(rw http.ResponseWriter, req *http.Request) error
 
 // About add script
 func (h *HttpRouters) AddScript(rw http.ResponseWriter, req *http.Request) error {
-	childLogger.Debug().Msg("GetPerson")
+	childLogger.Info().Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Msg("AddScript")
 
-	span := tracerProvider.Span(req.Context(), "adapter.api.GetPerson")
+	span := tracerProvider.Span(req.Context(), "adapter.api.AddScript")
 	defer span.End()
 
 	script := model.ScriptData{}
@@ -110,9 +110,9 @@ func (h *HttpRouters) AddScript(rw http.ResponseWriter, req *http.Request) error
 
 // About get key
 func (h *HttpRouters) GetKey(rw http.ResponseWriter, req *http.Request) error {
-	childLogger.Debug().Msg("UpdatePerson")
+	childLogger.Info().Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Msg("GetKey")
 
-	span := tracerProvider.Span(req.Context(), "adapter.api.UpdatePerson")
+	span := tracerProvider.Span(req.Context(), "adapter.api.GetKey")
 	defer span.End()
 
 	vars := mux.Vars(req)
@@ -137,9 +137,9 @@ func (h *HttpRouters) GetKey(rw http.ResponseWriter, req *http.Request) error {
 
 // About add key
 func (h *HttpRouters) AddKey(rw http.ResponseWriter, req *http.Request) error {
-	childLogger.Debug().Msg("ListPerson")
+	childLogger.Info().Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Msg("AddKey")
 
-	span := tracerProvider.Span(req.Context(), "adapter.api.ListPerson")
+	span := tracerProvider.Span(req.Context(), "adapter.api.AddKey")
 	defer span.End()
 
 	fee := model.Fee{}

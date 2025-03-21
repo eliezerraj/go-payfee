@@ -14,7 +14,7 @@ type WorkerRepository struct {
 
 // About create worker
 func NewWorkerRepository(redisClusterServer *go_core_cache.RedisClusterServer) *WorkerRepository{
-	childLogger.Debug().Msg("NewWorkerRepository")
+	childLogger.Info().Msg("NewWorkerRepository")
 
 	return &WorkerRepository{
 		RedisClusterServer: redisClusterServer,

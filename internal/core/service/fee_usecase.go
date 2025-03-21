@@ -16,8 +16,8 @@ var tracerProvider go_core_observ.TracerProvider
 
 // About add a script fee
 func (s *WorkerService) AddScript(ctx context.Context, script *model.ScriptData) (*model.ScriptData, error){
-	childLogger.Debug().Msg("AddScript")
-	childLogger.Debug().Interface("script: ",script).Msg("")
+	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("AddScript")
+	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Interface("script: ",script).Msg("")
 
 	//trace
 	span := tracerProvider.Span(ctx, "service.AddScript")
@@ -43,8 +43,8 @@ func (s *WorkerService) AddScript(ctx context.Context, script *model.ScriptData)
 
 // About get a script fee
 func (s *WorkerService) GetScript(ctx context.Context, script *model.ScriptData) (*model.Script, error){
-	childLogger.Debug().Msg("GetScript")
-	childLogger.Debug().Interface("script: ",script).Msg("")
+	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("GetScript")
+	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Interface("script: ",script).Msg("")
 
 	// trace
 	span := tracerProvider.Span(ctx, "service.GetScript")
@@ -70,8 +70,8 @@ func (s *WorkerService) GetScript(ctx context.Context, script *model.ScriptData)
 
 // About add a key
 func (s *WorkerService) AddKey(ctx context.Context, fee *model.Fee) (*model.Fee, error){
-	childLogger.Debug().Msg("AddKey")
-	childLogger.Debug().Interface("fee: ",fee).Msg("")
+	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("AddKey")
+	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Interface("fee: ",fee).Msg("")
 
 	// trace
 	span := tracerProvider.Span(ctx, "service.AddKey")
@@ -94,8 +94,8 @@ func (s *WorkerService) AddKey(ctx context.Context, fee *model.Fee) (*model.Fee,
 
 // About get a key
 func (s *WorkerService) GetKey(ctx context.Context, fee *model.Fee) (*model.Fee, error){
-	childLogger.Debug().Msg("GetKey")
-	childLogger.Debug().Interface("fee: ",fee).Msg("")
+	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("GetKey")
+	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Interface("fee: ",fee).Msg("")
 
 	// Trace
 	span := tracerProvider.Span(ctx, "service.GetKey")

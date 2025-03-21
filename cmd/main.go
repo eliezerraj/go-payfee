@@ -17,14 +17,14 @@ import(
 )
 
 var(
-	logLevel = 			zerolog.DebugLevel
+	logLevel 			= 	zerolog.InfoLevel // zerolog.InfoLevel zerolog.DebugLevel
 	appServer			model.AppServer
 	redisClusterServer 	go_core_cache.RedisClusterServer
 )
 
 // About initialize the enviroment var
 func init(){
-	log.Debug().Msg("init")
+	log.Info().Msg("init")
 	zerolog.SetGlobalLevel(logLevel)
 
 	infoPod, server := configuration.GetInfoPod()
@@ -40,10 +40,10 @@ func init(){
 
 // About main
 func main (){
-	log.Debug().Msg("----------------------------------------------------")
-	log.Debug().Msg("main")
-	log.Debug().Interface("appServer: ",appServer.InfoPod).Msg("")
-	log.Debug().Msg("----------------------------------------------------")
+	log.Info().Msg("----------------------------------------------------")
+	log.Info().Msg("main")
+	log.Info().Interface("appServer: ",appServer.InfoPod).Msg("")
+	log.Info().Msg("----------------------------------------------------")
 
 	ctx, cancel := context.WithTimeout(	context.Background(), 
 										time.Duration( appServer.Server.ReadTimeout ) * time.Second)

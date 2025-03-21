@@ -12,7 +12,7 @@ type WorkerService struct {
 }
 
 func NewWorkerService(workerRepository *cache.WorkerRepository) *WorkerService{
-	childLogger.Debug().Msg("NewWorkerService")
+	childLogger.Info().Msg("NewWorkerService")
 
 	return &WorkerService{
 		workerRepository: workerRepository,
