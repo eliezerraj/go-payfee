@@ -13,11 +13,11 @@ import(
 
 // About get redis env var
 func GetRedisEnv() model.DatabaseRedis {
-	childLogger.Info().Msg("GetDatabaseEnv")
+	childLogger.Info().Str("func","GetRedisEnv").Send()
 
 	err := godotenv.Load(".env")
 	if err != nil {
-		childLogger.Info().Err(err).Msg("No .env File !!!!")
+		childLogger.Info().Err(err).Send()
 	}
 	
 	var databaseRedis		model.DatabaseRedis

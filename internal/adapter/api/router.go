@@ -13,7 +13,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var childLogger = log.With().Str("adapter", "api.router").Logger()
+var childLogger = log.With().Str("component", "go-payfee").Str("package", "internal.adapter.api").Logger()
 
 var core_json coreJson.CoreJson
 var core_apiError coreJson.APIError
@@ -24,6 +24,8 @@ type HttpRouters struct {
 }
 
 func NewHttpRouters(workerService *service.WorkerService) HttpRouters {
+	childLogger.Info().Str("func","NewHttpRouters").Send()
+	
 	return HttpRouters{
 		workerService: workerService,
 	}
@@ -31,7 +33,7 @@ func NewHttpRouters(workerService *service.WorkerService) HttpRouters {
 
 // About return a health
 func (h *HttpRouters) Health(rw http.ResponseWriter, req *http.Request) {
-	childLogger.Info().Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Msg("Health")
+	childLogger.Info().Str("func","Health").Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Send()
 
 	health := true
 	json.NewEncoder(rw).Encode(health)
@@ -39,7 +41,7 @@ func (h *HttpRouters) Health(rw http.ResponseWriter, req *http.Request) {
 
 // About return a live
 func (h *HttpRouters) Live(rw http.ResponseWriter, req *http.Request) {
-	childLogger.Info().Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Msg("Live")
+	childLogger.Info().Str("func","Live").Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Send()
 
 	live := true
 	json.NewEncoder(rw).Encode(live)
@@ -47,14 +49,14 @@ func (h *HttpRouters) Live(rw http.ResponseWriter, req *http.Request) {
 
 // About show all header received
 func (h *HttpRouters) Header(rw http.ResponseWriter, req *http.Request) {
-	childLogger.Info().Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Msg("Header")
+	childLogger.Info().Str("func","Header").Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Send()
 	
 	json.NewEncoder(rw).Encode(req.Header)
 }
 
 // About get all script
 func (h *HttpRouters) GetScript(rw http.ResponseWriter, req *http.Request) error {
-	childLogger.Info().Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Msg("GetScript")
+	childLogger.Info().Str("func","GetScript").Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Send()
 
 	span := tracerProvider.Span(req.Context(), "adapter.api.GetScript")
 	defer span.End()
@@ -81,7 +83,7 @@ func (h *HttpRouters) GetScript(rw http.ResponseWriter, req *http.Request) error
 
 // About add script
 func (h *HttpRouters) AddScript(rw http.ResponseWriter, req *http.Request) error {
-	childLogger.Info().Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Msg("AddScript")
+	childLogger.Info().Str("func","AddScript").Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Send()
 
 	span := tracerProvider.Span(req.Context(), "adapter.api.AddScript")
 	defer span.End()
@@ -110,7 +112,7 @@ func (h *HttpRouters) AddScript(rw http.ResponseWriter, req *http.Request) error
 
 // About get key
 func (h *HttpRouters) GetKey(rw http.ResponseWriter, req *http.Request) error {
-	childLogger.Info().Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Msg("GetKey")
+	childLogger.Info().Str("func","GetKey").Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Send()
 
 	span := tracerProvider.Span(req.Context(), "adapter.api.GetKey")
 	defer span.End()
@@ -137,7 +139,7 @@ func (h *HttpRouters) GetKey(rw http.ResponseWriter, req *http.Request) error {
 
 // About add key
 func (h *HttpRouters) AddKey(rw http.ResponseWriter, req *http.Request) error {
-	childLogger.Info().Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Msg("AddKey")
+	childLogger.Info().Str("func","AddKey").Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Send()
 
 	span := tracerProvider.Span(req.Context(), "adapter.api.AddKey")
 	defer span.End()

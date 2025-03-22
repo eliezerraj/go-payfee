@@ -20,11 +20,13 @@ var(
 	logLevel 			= 	zerolog.InfoLevel // zerolog.InfoLevel zerolog.DebugLevel
 	appServer			model.AppServer
 	redisClusterServer 	go_core_cache.RedisClusterServer
+	childLogger = log.With().Str("component","go-payfee").Str("package", "main").Logger()
 )
 
 // About initialize the enviroment var
 func init(){
-	log.Info().Msg("init")
+	childLogger.Info().Str("func","init").Send()
+
 	zerolog.SetGlobalLevel(logLevel)
 
 	infoPod, server := configuration.GetInfoPod()
@@ -40,10 +42,7 @@ func init(){
 
 // About main
 func main (){
-	log.Info().Msg("----------------------------------------------------")
-	log.Info().Msg("main")
-	log.Info().Interface("appServer: ",appServer.InfoPod).Msg("")
-	log.Info().Msg("----------------------------------------------------")
+	childLogger.Info().Str("func","main").Interface("appServer :",appServer).Send()
 
 	ctx, cancel := context.WithTimeout(	context.Background(), 
 										time.Duration( appServer.Server.ReadTimeout ) * time.Second)
@@ -53,10 +52,10 @@ func main (){
 	cacheRedis := redisClusterServer.NewClusterCache(&appServer.DatabaseRedis.RedisOptions)
 	_, err := cacheRedis.Ping(ctx)
 	if err != nil{
-		log.Error().Err(err).Msg("Erro na abertura do Redis")
+		childLogger.Error().Err(err).Msg("erro open redis")
 		panic(err)
 	}
-	log.Debug().Msg(" ===> Redis Ping Sucessful !!! <===")
+	childLogger.Info().Msg("ping redis successful !!!")
 
 	// wire	
 	workerRepository := cache.NewWorkerRepository(cacheRedis)
