@@ -32,6 +32,10 @@ type Server struct {
 	CtxTimeout		int `json:"ctxTimeout"`
 }
 
+type MessageRouter struct {
+	Message			string `json:"message"`
+}
+
 type DatabaseRedis struct {
 	RedisAddress	string		`json:"redis_address"`
 	RedisOptions	redis.ClusterOptions
